@@ -1,0 +1,141 @@
+import { getBook} from "@/sanity/sanity-utils";
+import Image from "next/image";
+import Link from "next/link";
+import { PortableText, PortableTextComponents } from "@portabletext/react";
+import { urlFor } from "@/sanity/sanity-utils"; 
+
+
+const components: PortableTextComponents = {
+    types: {
+      image: ({ value }: any) => {
+        if (!value?.asset?._ref) return null;
+  
+        return (
+          <figure className="flex flex-col items-center my-6">
+            <Image
+              src={urlFor(value).url()} // Convert Sanity image reference to URL
+              alt={value.alt || "Content Image"}
+              width={600}
+              height={400}
+              className="w-full max-w-[300px] h-auto max-h-[400px] rounded-md"
+            />
+            {value.imageCaption && (
+              <figcaption className="text-sm text-gray-500 mt-2 italic text-center w-full">
+                {value.imageCaption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      },
+    },
+    block: {
+      normal: ({ children }) => (
+        <p className="text-[19px] text-center font-['Didot',serif] font-[500] text-[#5b5a5a] opacity-100">
+          {children}
+        </p>
+      ),
+      h1: ({ children }) => (
+        <h1 className="text-3xl font-extrabold text-center mt-6">{children}</h1>
+      ),
+      h2: ({ children }) => (
+        <h2 className="text-2xl font-bold text-center mt-4">{children}</h2>
+      ),
+      h3: ({ children }) => (
+        <h3 className="text-xl font-semibold text-center mt-3">{children}</h3>
+      ),
+      h4: ({ children }) => (
+        <h4 className="text-lg font-medium text-center mt-2">{children}</h4>
+      ),
+      h5: ({ children }) => (
+        <h5 className="text-base font-medium text-center mt-2">{children}</h5>
+      ),
+      h6: ({ children }) => (
+        <h6 className="text-sm font-normal text-center mt-2">{children}</h6>
+      ),
+      blockquote: ({ children }) => (
+        <blockquote className="border-l-4 border-gray-400 pl-4 italic">
+          {children}
+        </blockquote>
+      ),
+    },
+    marks: {
+      strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+      em: ({ children }) => <em className="italic">{children}</em>,
+      underline: ({ children }) => <span className="underline">{children}</span>,
+    },
+    list: {
+      bullet: ({ children }) => <ul className="list-disc pl-5">{children}</ul>,
+      number: ({ children }) => <ol className="list-decimal pl-5">{children}</ol>,
+    },
+    listItem: {
+      bullet: ({ children }) => <li className="mb-1">{children}</li>,
+      number: ({ children }) => <li className="mb-1">{children}</li>,
+    },
+  };
+  
+
+
+type Props = {
+  params: { book: string };
+};
+
+export default async function Book({ params }: Props) {
+    const slug = params.book;
+    const book = await getBook(slug);
+  
+    return (
+        <div className="min-h-screen bg-[#f8f8f6] text-[#333]">
+            <header className="flex justify-between items-center px-[100px] py-[20px] bg-[#f8f8f6]">
+                <div className="logo">
+                <Image
+
+                    src="/owlAthena-coloured.jpg"
+                    alt="Athena Dracko Logo"
+                    width={50}
+                    height={50}
+                    className="w-[50px] h-auto"
+                />
+                </div>
+                <nav>
+                <ul className="flex gap-[40px] list-none m-0 p-0">
+                    <li>
+                    <Link
+                        href="/Newsletter"
+                        className="text-[#777] text-[16px] relative transition-colors duration-300 hover:text-[#252424] after:content-[''] after:absolute after:left-0 after:bottom-[-3px] after:w-0 after:h-[2px] after:bg-[#252424] after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                        Back
+                    </Link>
+                    </li>
+                </ul>
+                </nav>
+            </header>
+            <main className="text-center opacity-100">
+                <h2 className="font-[Didot,serif] text-[35px] font-extrabold text-[#434343] mb-5 mr-5 border-b border-black block">
+                    {book.title}
+                </h2>
+                {book.image && (
+                    <div className="flex justify-center items-center mt-8">
+                        <div className="relative w-full max-w-[700px]">
+                        <Image
+                            src={book.image}
+                            alt="Project Image"
+                            width={700}
+                            height={400}
+                            className="w-full h-auto max-h-[400px] object-contain rounded-md"
+                        />
+                          <div>
+                            <figcaption className="text-sm text-gray-500 mt-2 italic text-center w-full">{book.imageCaption}</figcaption>
+                          </div>
+                        </div>
+                    </div>
+                )}
+        
+                {/* Content Section */}
+                <div className="mt-8 mx-auto text-left leading-relaxed text-[#434343] max-w-7xl">
+                    <PortableText value={book.content} components={components} />
+                </div>
+            </main>
+        </div>
+
+    );
+}
